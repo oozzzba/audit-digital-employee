@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>审计数字员工 · 审计项目工作台</title>
+<style>
+:root{
+  --primary:#D32F2F; --primary-dark:#B71C1C; --primary-bg:#FDEAEA;
+  --green:#2E7D32; --green-bg:#E8F5E9;
+  --amber:#B8860B; --amber-bg:#FFF8E1;
+  --gray-900:#1a1a1a; --gray-700:#444; --gray-500:#888; --gray-300:#ccc; --gray-100:#f0f0f0; --gray-50:#fafafa;
+  --white:#fff; --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--gray-900);background:#f6f7f9;font-size:14px;line-height:1.6}
+
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* 侧边栏 */
+.sidebar{width:224px;flex-shrink:0;background:#1f2229;color:#d7d9de;display:flex;flex-direction:column}
+.brand{padding:20px 20px 6px;font-size:17px;font-weight:800;color:#fff;display:flex;align-items:center;gap:9px}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:16px}
+.brand-sub{padding:0 20px 18px;font-size:11.5px;color:#8b8f98;border-bottom:1px solid #2c2f36}
+.nav{flex:1;overflow-y:auto;padding:12px 12px}
+.nav-group{font-size:11px;color:#5b5f68;padding:14px 10px 6px;letter-spacing:.5px}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:10px 13px;border:0;border-radius:9px;background:transparent;color:#d7d9de;font-size:13.5px;font-weight:500;cursor:pointer}
+.nav-item:hover{background:#2c2f36}
+.nav-item.active{background:var(--primary);color:#fff;font-weight:700}
+.nav-item .ico{width:19px;text-align:center;font-size:15px}
+.sidebar-foot{padding:12px 14px;border-top:1px solid #2c2f36}
+.new-btn-wrap{padding:14px 14px 4px}
+.new-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:#0c111d;color:#fff;font-size:13.5px;font-weight:700;padding:10px 13px;border:1px solid #2c2f36;border-radius:9px;cursor:pointer;transition:.15s}
+.new-btn:hover{background:#000;border-color:var(--primary)}
+.new-btn .plus{font-size:16px;font-weight:800;line-height:1}
+.role-info{position:relative;display:flex;align-items:center;gap:9px;background:#2c2f36;border:1px solid #3a3e46;border-radius:9px;padding:8px 10px;cursor:pointer}
+.role-info:hover{border-color:var(--primary)}
+.role-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.role-info-text{display:flex;flex-direction:column;line-height:1.25;min-width:0;flex:1}
+.role-name{font-size:12.5px;font-weight:700;color:#e7e9ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role-title{font-size:10.5px;color:#8b8f98}
+.role-caret{color:#8b8f98;font-size:11px}
+.role-switcher{position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:#2c2f36;border:1px solid #3a3e46;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none;max-height:320px;overflow-y:auto;z-index:70;padding:4px}
+.role-switcher.show{display:block}
+.role-option{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 10px;border:0;background:transparent;color:#d7d9de;font-size:12.5px;cursor:pointer;border-radius:7px}
+.role-option:hover{background:#3a3e46}
+.role-option.active{color:#ff8a8a;font-weight:700}
+.role-option .role-avatar{width:22px;height:22px;font-size:11px;background:#3a3e46;color:#d7d9de}
+.role-option.active .role-avatar{background:var(--primary);color:#fff}
+.stat-grid{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.stat-card{flex:1;min-width:140px;background:#fff;border:1px solid #ececec;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.stat-card .stat-num{font-size:26px;font-weight:800;color:var(--gray-900);line-height:1.1}
+.stat-card .stat-label{font-size:12px;color:var(--gray-500);margin-top:4px}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:12.5px}
+.bar-row .bar-label{width:96px;color:var(--gray-700);flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:10px;background:#f0f0f0;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;background:var(--primary)}
+.bar-row .bar-val{width:44px;color:var(--gray-500);font-size:12px;text-align:right}
+
+/* 主区 */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:#f6f7f9}
+
+/* 顶栏：角色切换器 + 通知 + 后台管理 */
+.topbar{height:54px;flex-shrink:0;background:#fff;border-bottom:1px solid #ececec;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:12px}
+.topbar-title{font-size:15px;font-weight:800;color:var(--gray-900)}
+.topbar-left{display:flex;align-items:center;min-width:0}
+.breadcrumb{display:flex;align-items:center;gap:7px;font-size:13.5px;white-space:nowrap}
+.crumb-home{color:var(--gray-500);font-weight:600;cursor:pointer}
+.crumb-home:hover{color:var(--primary)}
+.crumb-sep{color:var(--gray-300)}
+.crumb-cur{font-weight:800;color:var(--gray-900)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.toplink{border:0;background:transparent;color:var(--gray-700);font-size:13px;font-weight:600;padding:7px 10px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.toplink:hover{background:#f5f5f5;color:var(--primary)}
+.side-role-label{font-size:11px;color:#5b5f68;margin-bottom:5px;letter-spacing:.5px}
+.side-foot-note{margin-top:9px;font-size:11px;color:#5b5f68}
+.notif{position:relative;border:0;background:transparent;font-size:19px;cursor:pointer;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.notif:hover{background:#f5f5f5}
+.notif-badge{position:absolute;top:2px;right:1px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--primary);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.notif-badge.zero{display:none}
+.notices-pop{position:absolute;top:46px;right:20px;width:320px;max-height:360px;overflow-y:auto;background:#fff;border:1px solid #ececec;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:60;display:none}
+.notices-pop.show{display:block}
+.notices-head{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:700}
+.notices-head .mark-read{border:0;background:transparent;color:var(--primary);font-size:12px;cursor:pointer;font-weight:600}
+.notice-item{padding:10px 14px;border-bottom:1px solid #f5f5f5;font-size:12.5px;color:#444}
+.notice-item:last-child{border-bottom:0}
+.notice-item .n-role{font-size:11px;color:var(--primary);font-weight:700;margin-bottom:2px}
+.notice-item.unread{background:#fff8f8}
+.notices-empty{padding:26px 14px;text-align:center;color:var(--gray-500);font-size:12.5px}
+
+/* 后台管理下拉 */
+.admin-wrap{position:relative}
+.admin-btn{border:1px solid var(--gray-300);background:#fff;color:var(--gray-700);font-size:13px;font-weight:600;padding:7px 13px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.admin-btn:hover{border-color:var(--primary);color:var(--primary)}
+.dropdown{position:absolute;top:40px;right:0;width:180px;background:#fff;border:1px solid #ececec;border-radius:11px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:60;display:none;padding:6px}
+.dropdown.show{display:block}
+.dropdown button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:transparent;padding:9px 11px;font-size:13.5px;font-weight:500;color:#444;border-radius:7px;cursor:pointer}
+.dropdown button:hover{background:#f5f5f5;color:var(--primary)}
+
+.view{display:none;flex:1;min-height:0;flex-direction:column}
+.view.active{display:flex}
+
+/* 工作台 / 面板 */
+.workbench{flex:1;overflow-y:auto;padding:24px}
+.wb-inner{max-width:960px;margin:0 auto}
+.wb-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.wb-title{font-size:20px;font-weight:800;color:var(--gray-900)}
+.wb-sub{font-size:12.5px;color:var(--gray-500);margin-top:4px}
+.wb-meta{text-align:right;font-size:12px;color:var(--gray-500)}
+.pid-chip{display:inline-block;background:#fff;border:1px solid #e5e5e5;border-radius:7px;padding:2px 9px;font-family:ui-monospace,monospace;font-size:11.5px;color:#666;margin-top:6px}
+
+/* 阶段 stepper */
+.stepper{display:flex;align-items:flex-start;background:#fff;border:1px solid #ececec;border-radius:var(--radius);padding:18px 14px;box-shadow:var(--shadow);overflow-x:auto;margin-bottom:18px}
+.step{flex:1;min-width:92px;text-align:center;cursor:pointer;position:relative;padding:0 2px;border:0;background:transparent}
+.step-dot{width:34px;height:34px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#999;background:#f0f0f0;border:2px solid #e0e0e0;transition:.15s}
+.step-name{font-size:12.5px;color:#777;font-weight:600;line-height:1.3}
+.step.done .step-dot{background:var(--green);border-color:var(--green);color:#fff}
+.step.done .step-name{color:var(--green)}
+.step.active .step-dot{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 0 0 4px rgba(211,47,47,.15)}
+.step.active .step-name{color:var(--primary);font-weight:800}
+.step.selected .step-name{text-decoration:underline;text-underline-offset:3px;color:var(--primary)}
+.step-line{position:absolute;top:17px;left:calc(50% + 22px);right:calc(-50% + 22px);height:2px;background:#e5e5e5}
+.step:last-child .step-line{display:none}
+.step-line.done{background:var(--green)}
+
+/* 待办卡片 */
+.card{background:#fff;border:1px solid #ececec;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.card-title{font-size:15px;font-weight:800;color:var(--gray-900);display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:4px}
+.card-desc{font-size:12.5px;color:var(--gray-500);margin-bottom:16px}
+.progress-line{font-size:13px;color:#555;background:#fafafa;border:1px solid #f0f0f0;border-radius:8px;padding:8px 12px;margin-bottom:16px}
+.todo-item{display:flex;align-items:flex-start;gap:12px;padding:11px 6px;border-bottom:1px solid #f5f5f5}
+.todo-item:last-child{border-bottom:0}
+.todo-item.mine{background:#fff8f8;border-radius:8px}
+.todo-check{width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px}
+.todo-check.done{background:var(--green);color:#fff}
+.todo-check.pending{border:2px solid #d0d0d0;color:transparent}
+.todo-body{flex:1}
+.todo-label{font-size:14px;color:#222}
+.todo-item.done .todo-label{color:#999;text-decoration:line-through}
+.todo-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;margin-left:8px;vertical-align:1px}
+.todo-tag.gate{color:var(--amber);background:var(--amber-bg);border:1px solid #ffe9a8}
+.todo-tag.gate.done{color:var(--green);background:var(--green-bg);border:1px solid #c8e6c9}
+.todo-tag.role{color:#555;background:#f0f0f0;border:1px solid #e0e0e0}
+.todo-tag.mine{color:var(--primary);background:var(--primary-bg);border:1px solid #ffcdd2}
+.empty-hint{text-align:center;color:var(--gray-500);padding:44px 20px;font-size:13.5px;line-height:1.9}
+.empty-hint .big{font-size:32px;margin-bottom:10px}
+.btn{border:1px solid var(--gray-300);background:#fff;color:var(--gray-700);font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark);color:#fff}
+
+/* 面板通用 */
+.panel{flex:1;overflow-y:auto;padding:24px}
+.panel-inner{max-width:1000px;margin:0 auto}
+.panel-title{font-size:19px;font-weight:800;color:var(--gray-900);margin-bottom:4px}
+.panel-sub{font-size:12.5px;color:var(--gray-500);margin-bottom:18px}
+.tabs{display:flex;gap:6px;border-bottom:1px solid #ececec;margin-bottom:16px}
+.tab{border:0;background:transparent;padding:9px 16px;font-size:13.5px;font-weight:600;color:var(--gray-500);cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;color:#444;background:#f5f5f5;border-radius:6px;padding:2px 8px}
+.chip.red{color:#b71c1c;background:#fdecea;border:1px solid #ffcdd2;font-weight:600}
+.chip.green{color:#1b5e20;background:#e8f5e9;border:1px solid #c8e6c9}
+.table-wrap{overflow-x:auto;border:1px solid #eee;border-radius:8px;background:#fff}
+table.data{border-collapse:collapse;width:100%;font-size:12.5px}
+table.data th,table.data td{border-bottom:1px solid #f0f0f0;padding:7px 10px;text-align:left;white-space:nowrap}
+table.data th{background:#fafafa;font-weight:600;color:#333}
+table.data tbody tr:hover{background:#fff8f8}
+.note{font-size:11.5px;color:#aaa;margin-top:10px}
+.loading{color:var(--gray-500);padding:30px;text-align:center;font-size:13.5px}
+.back-row{margin-bottom:14px}
+
+/* markdown / chat */
+.md h1,.md h2,.md h3,.md h4{margin:10px 0 6px;font-weight:700;color:#111}
+.md h1{font-size:16px}.md h2{font-size:15px}.md h3{font-size:14px}
+.md p{margin:5px 0}.md ul,.md ol{margin:6px 0 6px 20px}.md li{margin:2px 0}
+.md strong{color:#111}
+.md code{background:#f2f2f2;border-radius:4px;padding:1px 5px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.md pre{background:#f6f6f6;border:1px solid #eee;border-radius:8px;padding:10px;overflow-x:auto;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;white-space:pre}
+.md table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12px}
+.md th,.md td{border:1px solid #e5e5e5;padding:5px 8px;text-align:left}
+.md th{background:#fafafa}
+.md-table-scroll{overflow-x:auto}
+
+/* 聊天控制台 */
+.chat-scroll{flex:1;overflow-y:auto;padding:22px 24px}
+.chat-inner{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.msg{display:flex;gap:11px}
+.msg.user{flex-direction:row-reverse}
+.avatar{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700}
+.msg.ai .avatar{background:var(--primary-bg);color:var(--primary)}
+.msg.user .avatar{background:#eef2f7;color:#333}
+.msg-body{max-width:76%;min-width:0}
+.msg.user .msg-body{display:flex;justify-content:flex-end}
+.msg-name{font-size:12px;color:var(--gray-500);margin-bottom:4px}
+.msg.user .msg-name{text-align:right}
+.bubble{background:#fff;border:1px solid #ececec;border-radius:var(--radius);padding:12px 15px;box-shadow:var(--shadow);font-size:13.5px;color:#222;overflow-wrap:break-word;min-width:0}
+.msg.user .bubble{background:var(--primary);color:#fff;border-color:var(--primary)}
+.bubble.info{background:var(--green-bg);border-color:#c8e6c9;color:#1b5e20}
+.bubble.err{background:var(--amber-bg);border-color:#ffe9a8;color:#6d5200}
+.bubble.typing{color:var(--gray-500);font-style:italic}
+.msg-files{margin-bottom:5px;display:flex;flex-wrap:wrap;gap:5px}
+.file-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,.08);font-size:11.5px}
+.stage-title{font-size:15px;font-weight:800;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stage-title .tag{font-size:11px;font-weight:600;background:var(--primary-bg);color:var(--primary);padding:2px 8px;border-radius:5px}
+.block{border-top:1px solid #f0f0f0;padding-top:10px;margin-top:10px}
+.block:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.block-label{font-size:12px;font-weight:700;color:var(--gray-500);margin-bottom:6px}
+.gate-note{margin-top:12px;padding:8px 12px;background:var(--amber-bg);border:1px solid #ffe9a8;border-radius:8px;font-size:12.5px;color:#6d5200}
+.next-note{margin-top:6px;font-size:12px;color:var(--gray-500)}
+/* 回复层：可复制模板 + 折叠块 */
+.reply-line{line-height:1.7}
+.reply-gap{height:10px}
+.tpl-block{position:relative;background:#fafafa;border:1px dashed #e3c9c9;border-radius:10px;padding:12px 14px 42px;margin:10px 0}
+.tpl-block pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#333;background:transparent}
+.copy-btn{position:absolute;right:10px;bottom:8px;border:1px solid var(--gray-300);background:#fff;color:var(--primary);font-size:12px;font-weight:600;padding:3px 11px;border-radius:6px;cursor:pointer}
+.copy-btn:hover{border-color:var(--primary);background:var(--primary-bg)}
+.bubble details{margin-top:10px;border:1px solid #eee;border-radius:9px;padding:8px 12px;background:#fbfbfb}
+.bubble summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--gray-700);outline:none}
+.bubble details[open] summary{margin-bottom:8px}
+/* 新建任务 · Dify 风格对话（开场白 + 输入示例 + 上传） */
+.console-home{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:32px 24px 12px}
+.home-hero{text-align:center;margin-bottom:22px;max-width:780px}
+.home-mascot{width:44px;height:44px;margin:0 auto 9px;background:linear-gradient(135deg,var(--primary),#C62828);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(211,47,47,.25)}
+.home-mascot svg{width:24px;height:24px;color:#fff}
+.home-title{font-size:20px;font-weight:700;color:var(--gray-900);margin-bottom:5px}
+.home-title span{color:var(--primary)}
+.home-subtitle{font-size:12.5px;color:var(--gray-500);line-height:1.55}
+.home-section{width:100%;max-width:820px}
+.sug-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sug-card{min-height:98px;background:#fff;border:1px solid #ececec;border-radius:14px;padding:16px 18px;cursor:pointer;transition:.18s;text-align:left;display:flex;align-items:flex-start;gap:14px;box-shadow:var(--shadow)}
+.sug-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:var(--primary)}
+.sug-card-icon{flex:0 0 42px;width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--primary-bg)}
+.sug-card-title{font-size:14px;font-weight:700;color:var(--gray-900);line-height:1.4}
+.sug-card-desc{margin-top:4px;font-size:12px;color:var(--gray-500);line-height:1.55}
+
+.chat-input-wrap{border-top:1px solid #ececec;background:#fff;padding:12px 24px 16px}
+.chat-input-inner{max-width:720px;margin:0 auto}
+.home-input-box{border:1px solid var(--gray-300);border-radius:20px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06);padding:4px;transition:border-color .15s,box-shadow .15s}
+.home-input-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 4px rgba(211,47,47,.1)}
+.home-input{display:flex;align-items:flex-end;gap:8px;padding:6px 10px}
+.chat-input{flex:1;border:none;outline:none;font-size:14px;resize:none;min-height:32px;max-height:120px;background:transparent;color:var(--gray-900);padding:4px 0;font-family:inherit;line-height:1.5}
+.chat-input::placeholder{color:var(--gray-500)}
+.home-input-actions{display:flex;align-items:center;gap:4px;position:relative}
+.home-input-action{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:50%;color:var(--gray-500);font-size:16px;cursor:pointer}
+.home-input-action:hover{background:var(--gray-100);color:var(--gray-700)}
+.home-upload-dropdown{position:absolute;bottom:calc(100% + 10px);left:0;min-width:200px;background:#fff;border:1px solid #ececec;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);padding:6px;display:none;z-index:100}
+.home-upload-dropdown.show{display:block}
+.home-upload-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;font-size:13px;color:var(--gray-700);cursor:pointer}
+.home-upload-item:hover{background:var(--gray-50);color:var(--primary)}
+.home-upload-divider{height:1px;background:var(--gray-100);margin:6px 0}
+.home-attachment-list{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px 0}
+.home-attachment-list:empty{display:none}
+.home-attachment-chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 6px 0 8px;border:1px solid #f2c6c2;border-radius:6px;background:var(--primary-bg);color:var(--primary);font-size:11px;max-width:220px}
+.home-attachment-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-attachment-chip button{border:0;background:transparent;color:inherit;font-size:15px;line-height:1;cursor:pointer;padding:0}
+.send-btn{flex-shrink:0;width:32px;height:32px;border:0;background:var(--primary);color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+.send-btn:hover{background:var(--primary-dark)}
+.send-btn:disabled{background:#ddd;cursor:not-allowed}
+
+/* 会话记录 */
+.session-log{display:flex;flex-direction:column;gap:10px}
+.slog-item{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #ececec;border-radius:10px;padding:12px 14px}
+.slog-role{flex-shrink:0;min-width:74px;font-size:12px;font-weight:800;color:var(--primary);padding-top:1px}
+.slog-role.user{color:var(--gray-700)}
+.slog-text{flex:1;font-size:13px;color:#333;white-space:pre-wrap;word-break:break-word}
+.slog-time{flex-shrink:0;font-size:11px;color:#bbb;padding-top:1px}
+
+/* 设置 / 个人中心 */
+.config-row{display:flex;justify-content:space-between;gap:16px;padding:12px 4px;border-bottom:1px solid #f5f5f5}
+.config-row:last-child{border-bottom:0}
+.config-k{font-size:13.5px;color:#555}
+.config-v{font-size:13.5px;font-weight:700;color:#222;text-align:right;font-family:ui-monospace,monospace}
+.profile-head{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.profile-avatar{width:60px;height:60px;border-radius:14px;background:var(--primary-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
+.profile-name{font-size:18px;font-weight:800}
+.profile-role{font-size:12.5px;color:var(--gray-500)}
+
+/* 退出登录 overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:99}
+.overlay.show{display:flex}
+.overlay-card{background:#fff;border-radius:16px;padding:36px;text-align:center;width:320px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.overlay-card .big{font-size:40px;margin-bottom:12px}
+.overlay-card h2{font-size:17px;margin-bottom:8px}
+.overlay-card p{font-size:13px;color:var(--gray-500);margin-bottom:22px}
+
+@media(max-width:760px){
+  .sidebar{width:64px}
+  .brand span:not(.logo),.brand-sub,.nav-item span:not(.ico),.sidebar-foot{display:none}
+  .nav-item{justify-content:center;padding:11px}
+  .msg-body{max-width:92%}
+  .sug-cards{grid-template-columns:1fr}
+  .wb-head{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="logo">审</span><span>审计数字员工</span></div>
+    <div class="brand-sub">六阶段审计工作台</div>
+    <div class="new-btn-wrap">
+      <button class="new-btn" onclick="switchView('console')"><span class="plus">＋</span>新建任务</button>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">工作台</div>
+      <button class="nav-item" data-view="sessions" onclick="switchView('sessions')"><span class="ico">💬</span><span>会话记录</span></button>
+      <button class="nav-item" data-view="materials" onclick="switchView('materials')"><span class="ico">📁</span><span>项目资料</span></button>
+      <button class="nav-item active" data-view="workbench" onclick="switchView('workbench')"><span class="ico">📊</span><span>项目看板</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="side-role-label">当前角色</div>
+      <div class="role-info" onclick="toggleRoleSwitcher(event)">
+        <span class="role-avatar" id="currentRoleAvatar">项</span>
+        <span class="role-info-text">
+          <span class="role-name" id="currentRoleName">项目负责人</span>
+          <span class="role-title" id="currentRoleTitle">点击切换角色</span>
+        </span>
+        <span class="role-caret">▾</span>
+        <div class="role-switcher" id="roleSwitcher"></div>
+      </div>
+      <div class="side-foot-note">真实脱敏数据 · 非模拟</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb">
+          <span class="crumb-home" onclick="switchView('workbench')" title="返回首页">审计数字员工</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-cur" id="topbarTitle">项目看板</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="toplink" onclick="switchView('workbench')" title="待办">✅ 待办</button>
+        <button class="toplink" onclick="switchView('manual')" title="使用手册">📖 使用手册</button>
+        <button class="notif" id="notifBtn" onclick="toggleNotices()" title="系统通知">🔔<span class="notif-badge zero" id="notifBadge">0</span></button>
+        <div class="admin-wrap">
+          <button class="admin-btn" onclick="toggleAdminMenu()">后台管理 ▾</button>
+          <div class="dropdown" id="adminMenu">
+            <button onclick="openAdmin('admin-users')">👥 用户管理</button>
+            <button onclick="openAdmin('knowledge')">📚 知识管理</button>
+            <button onclick="openAdmin('agents')">🧩 Agent 管理</button>
+            <button onclick="openAdmin('flow')">🔀 智能体编排</button>
+            <button onclick="openAdmin('admin-metrics')">📈 评测指标</button>
+            <button onclick="openAdmin('tools')">🔌 工具管理</button>
+            <button onclick="openAdmin('admin-prompts')">📝 Prompt 管理</button>
+            <button onclick="openAdmin('admin-logs')">📋 日志管理</button>
+            <button onclick="openAdmin('settings')">⚙️ 系统设置</button>
+          </div>
+        </div>
+        <button class="toplink" onclick="switchView('profile')">👤 个人中心</button>
+        <button class="toplink" onclick="logout()">🚪 退出登录</button>
+      </div>
+    </header>
+
+    <div class="notices-pop" id="noticesPop"></div>
+
+    <!-- 新建任务 -->
+    <section class="view" id="view-console">
+      <div class="console-home" id="consoleHome">
+        <div class="home-hero">
+          <div class="home-mascot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          </div>
+          <div class="home-title">您好，我是 <span>审计数字员工</span></div>
+          <div class="home-subtitle">我可以辅助您完成审计项目全生命周期管理，点击下方卡片或输入您想办理的审计业务</div>
+        </div>
+        <div class="home-section"><div class="sug-cards" id="suggestionCards"></div></div>
+      </div>
+      <div class="chat-scroll" id="chatScroll" style="display:none"><div class="chat-inner" id="chatMessages"></div></div>
+      <div class="chat-input-wrap"><div class="chat-input-inner">
+        <div class="home-input-box">
+          <div class="home-attachment-list" id="homeAttachmentList"></div>
+          <div class="home-input">
+            <div class="home-input-actions">
+              <input id="homeFileInput" type="file" multiple hidden onchange="handleSelectedFiles(this.files)">
+              <button class="home-input-action" id="homeUploadBtn" title="添加审计附件" onclick="toggleUploadDropdown(event)">📎</button>
+              <div class="home-upload-dropdown" id="homeUploadDropdown">
+                <div class="home-upload-item" onclick="selectAuditFiles(event,'video/*')">🎬 上传视频</div>
+                <div class="home-upload-item" onclick="selectAuditFiles(event,'audio/*')">🎙️ 上传音频</div>
+                <div class="home-upload-divider"></div>
+                <div class="home-upload-item" onclick="selectAuditFiles(event,'image/*')">🖼️ 上传图片</div>
+                <div class="home-upload-item" onclick="selectAuditFiles(event,'.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip')">📄 上传文档</div>
+              </div>
+            </div>
+            <textarea class="chat-input" id="chatInput" placeholder="帮我创建2026年业务外包专项审计项目"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendChat()">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- 项目看板（六阶段快速切换 + 角色待办） -->
+    <section class="view active" id="view-workbench">
+      <div class="workbench"><div class="wb-inner">
+        <div class="wb-head">
+          <div>
+            <div class="wb-title">项目看板</div>
+            <div class="wb-sub" id="wbTask">尚未下达审计任务</div>
+          </div>
+          <div class="wb-meta">当前项目
+            <div><span class="pid-chip" id="wbPid">—</span></div>
+          </div>
+        </div>
+        <div class="stepper" id="stepper"></div>
+        <div class="card">
+          <div class="card-title" id="todoTitle">待办列表</div>
+          <div class="card-desc" id="todoDesc"></div>
+          <div class="progress-line" id="todoProgress"></div>
+          <div id="todoList"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- 会话记录 -->
+    <section class="view" id="view-sessions"><div class="panel"><div class="panel-inner" id="panel-sessions"></div></div></section>
+
+    <!-- 项目资料 -->
+    <section class="view" id="view-materials"><div class="panel"><div class="panel-inner" id="panel-materials"></div></div></section>
+
+    <!-- 系统设置 -->
+    <section class="view" id="view-settings"><div class="panel"><div class="panel-inner" id="panel-settings"></div></div></section>
+    <!-- 个人中心 -->
+    <section class="view" id="view-profile"><div class="panel"><div class="panel-inner" id="panel-profile"></div></div></section>
+
+    <!-- 使用手册 -->
+    <section class="view" id="view-manual"><div class="panel"><div class="panel-inner" id="panel-manual"></div></div></section>
+
+    <!-- 后台管理：流程引擎 / 智能体编排 / 知识库 / 工具契约 -->
+    <section class="view" id="view-admin"><div class="panel"><div class="panel-inner" id="panel-admin"></div></div></section>
+  </main>
+</div>
+
+<!-- 退出登录 overlay -->
+<div class="overlay" id="logoutOverlay">
+  <div class="overlay-card">
+    <div class="big">🚪</div>
+    <h2>已退出登录</h2>
+    <p>当前会话上下文已清空，未提交的演示状态已释放。</p>
+    <button class="btn-primary" style="padding:10px 26px;border-radius:9px;font-size:14px" onclick="relogin()">重新登录</button>
+  </div>
+</div>
+
+<script>
+let projectId = null;
+let currentStage = 'initiation';
+let currentView = 'workbench';
+let currentRole = 'project_lead';
+let chatLog = [];  // 会话记录（本会话对话流水）
+
+const VIEW_TITLES = {
+  console:'新建任务', workbench:'项目看板', sessions:'会话记录',
+  materials:'项目资料', settings:'系统设置', profile:'个人中心',
+  admin:'后台管理', manual:'使用手册'
+};
+const STAGE_MAP = { '审计立项':'initiation','审前准备':'preaudit','现场实施':'field','审计报告编制':'report','问题整改':'rectification','项目归档':'archive' };
+
+function $(id){ return document.getElementById(id); }
+
+function storeSession(id){ try { localStorage.setItem('audit_session_id', id); } catch(e){} }
+function loadSession(){ try { return localStorage.getItem('audit_session_id'); } catch(e){ return null; } }
+function clearSession(){ try { localStorage.removeItem('audit_session_id'); } catch(e){} }
+
+async function ensureSession(){
+  if (!projectId) {
+    const saved = loadSession();
+    if (saved) {
+      projectId = saved;   // 复用上次会话（后端已持久化，刷新/重启后可继续推进）
+    } else {
+      const r = await fetch('/api/session'); const d = await r.json();
+      projectId = d.session_id;
+      storeSession(projectId);
+    }
+  }
+  return projectId;
+}
+
+function nowStr(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+
+// ==================== 视图切换 ====================
+async function switchView(v){
+  currentView = v;
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === v));
+  const el = $('view-' + v);
+  if (el) el.classList.add('active');
+  $('topbarTitle').textContent = VIEW_TITLES[v] || v;
+  if (v === 'workbench') renderWorkbench();
+  else if (v === 'console') { updateConsoleHome(); }
+  else if (v === 'sessions') renderSessions();
+  else if (v === 'materials') renderMaterials();
+  else if (v === 'settings') renderSettings();
+  else if (v === 'profile') renderProfile();
+  else if (v === 'manual') renderManual();
+}
+
+// ==================== 角色切换器 + 通知 ====================
+async function loadRoles(){
+  await ensureSession();
+  const d = await (await fetch('/api/roles?session_id=' + encodeURIComponent(projectId))).json();
+  currentRole = d.current || currentRole;
+  renderRoleUI(d);
+  refreshNotices();
+}
+
+function renderRoleUI(d){
+  const roles = d.roles || [];
+  const name = roleName(currentRole);
+  $('currentRoleAvatar').textContent = name.charAt(0);
+  $('currentRoleName').textContent = name;
+  $('roleSwitcher').innerHTML = roles.map(r => {
+    const nm = roleName(r.key);
+    return '<button class="role-option' + (r.key === currentRole ? ' active' : '') + '" onclick="switchRole(\'' + r.key + '\')"><span class="role-avatar">' + escapeHtml(nm.charAt(0)) + '</span><span>' + escapeHtml(nm) + '</span>' + (r.key === currentRole ? '<span style="margin-left:auto;font-size:11px">✓</span>' : '') + '</button>';
+  }).join('');
+}
+
+function toggleRoleSwitcher(e){
+  if (e) e.stopPropagation();
+  $('roleSwitcher').classList.toggle('show');
+  $('adminMenu').classList.remove('show');
+  $('noticesPop').classList.remove('show');
+}
+
+async function switchRole(key){
+  await ensureSession();
+  try {
+    await fetch('/api/roles/switch', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({session_id: projectId, role: key}) });
+  } catch(e){}
+  $('roleSwitcher').classList.remove('show');
+  await loadRoles();
+  if (currentView === 'workbench') loadTodos(currentStage);
+}
+
+async function refreshNotices(){
+  if (!projectId) return;
+  try {
+    const d = await (await fetch('/api/notices?session_id=' + encodeURIComponent(projectId) + '&role=' + encodeURIComponent(currentRole))).json();
+    const badge = $('notifBadge');
+    const n = d.unread || 0;
+    badge.textContent = n;
+    badge.classList.toggle('zero', n === 0);
+    $('notifBtn').setAttribute('data-items', JSON.stringify(d.items || []));
+  } catch(e){}
+}
+
+function toggleNotices(){
+  const pop = $('noticesPop');
+  const show = pop.classList.toggle('show');
+  $('adminMenu').classList.remove('show');
+  if (show) renderNotices();
+}
+
+function renderNotices(){
+  let items = [];
+  try { items = JSON.parse($('notifBtn').getAttribute('data-items') || '[]'); } catch(e){}
+  const pop = $('noticesPop');
+  if (!items.length){
+    pop.innerHTML = '<div class="notices-empty">当前角色暂无系统通知</div>';
+    return;
+  }
+  pop.innerHTML = '<div class="notices-head"><span>系统通知（' + escapeHtml(roleName(currentRole)) + '）</span><button class="mark-read" onclick="markRead()">全部已读</button></div>' +
+    items.map(n => '<div class="notice-item ' + (n.read ? '' : 'unread') + '"><div class="n-role">' + escapeHtml(n.role_name || '') + '</div>' + escapeHtml(n.text) + '</div>').join('');
+}
+
+async function markRead(){
+  await ensureSession();
+  try {
+    await fetch('/api/notices?session_id=' + encodeURIComponent(projectId) + '&role=' + encodeURIComponent(currentRole) + '&mark_read=true');
+  } catch(e){}
+  refreshNotices();
+  renderNotices();
+}
+
+function roleName(key){
+  const map = {project_lead:'项目负责人',business_lead:'业务负责人',group_lead:'组长',chief_auditor:'主审',team_lead:'小组长',auditor:'审计人员',respondent:'迎审人员',review_panel:'审理组',rect_dept_lead:'部门整改负责人',biz_dept_lead:'业务部门负责人'};
+  return map[key] || key;
+}
+
+// ==================== 后台管理下拉 ====================
+function toggleAdminMenu(){
+  const m = $('adminMenu');
+  m.classList.toggle('show');
+  $('noticesPop').classList.remove('show');
+}
+const ADMIN_TITLES = {
+  flow:'智能体编排', agents:'Agent 管理', knowledge:'知识管理', tools:'工具管理',
+  'admin-users':'用户管理', 'admin-metrics':'评测指标', 'admin-prompts':'Prompt 管理', 'admin-logs':'日志管理'
+};
+function openAdmin(key){
+  $('adminMenu').classList.remove('show');
+  if (key === 'settings'){ switchView('settings'); return; }
+  currentView = 'admin';
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  $('view-admin').classList.add('active');
+  $('topbarTitle').textContent = '后台管理 · ' + (ADMIN_TITLES[key] || '');
+  if (key === 'flow') renderFlow();
+  else if (key === 'agents') renderAgents();
+  else if (key === 'knowledge') renderKnowledge();
+  else if (key === 'tools') renderTools();
+  else if (key === 'admin-users') renderAdminUsers();
+  else if (key === 'admin-metrics') renderAdminMetrics();
+  else if (key === 'admin-prompts') renderAdminPrompts();
+  else if (key === 'admin-logs') renderAdminLogs();
+}
+// 点击外部关闭下拉
+document.addEventListener('click', function(e){
+  if (!e.target.closest('.admin-wrap')) $('adminMenu').classList.remove('show');
+  if (!e.target.closest('.notif') && !e.target.closest('.notices-pop')) $('noticesPop').classList.remove('show');
+  if (!e.target.closest('.role-info')) $('roleSwitcher').classList.remove('show');
+});
+
+// ==================== 项目看板 ====================
+async function renderWorkbench(){
+  await ensureSession();
+  $('wbPid').textContent = projectId;
+  loadTodos(currentStage);
+}
+
+async function loadTodos(stage){
+  currentStage = stage;
+  await ensureSession();
+  const r = await fetch('/api/todos?project_id=' + encodeURIComponent(projectId) + '&stage=' + encodeURIComponent(stage) + '&role=' + encodeURIComponent(currentRole));
+  const d = await r.json();
+  $('wbTask').textContent = d.task || '尚未下达审计任务';
+  renderStepper(d.phases || [], d.selected);
+  renderTodoCard(d);
+}
+
+function renderStepper(phases, selected){
+  const el = $('stepper');
+  el.innerHTML = phases.map((p, i) => {
+    const status = p.status;
+    const dot = status === 'done' ? '✓' : (status === 'active' ? '▶' : String(i + 1));
+    const line = i < phases.length - 1 ? '<span class="step-line ' + (status === 'done' ? 'done' : '') + '"></span>' : '';
+    return '<button class="step ' + status + '" data-name="' + p.name + '" onclick="selectStageByLabel(\'' + p.name + '\')">' +
+      '<div class="step-dot">' + dot + '</div><div class="step-name">' + escapeHtml(p.name) + '</div>' + line + '</button>';
+  }).join('');
+  document.querySelectorAll('.step').forEach(s => {
+    if (STAGE_MAP[s.dataset.name] === selected) s.classList.add('selected');
+  });
+}
+
+function selectStageByLabel(label){ loadTodos(STAGE_MAP[label] || 'initiation'); }
+
+function renderTodoCard(d){
+  $('todoTitle').innerHTML = '待办列表 · <span style="color:var(--primary)">' + escapeHtml(d.selected_name || '') + '</span>' +
+    ' <span class="todo-tag mine">角色：' + escapeHtml(d.current_role_name || '') + '</span>';
+  $('todoDesc').textContent = d.task ? '项目：' + d.task : '';
+  $('todoProgress').textContent = '📍 ' + (d.progress_desc || '');
+  const todos = d.todos || [];
+  $('todoList').innerHTML = todos.map(t => {
+    const done = t.done ? 'done' : 'pending';
+    let tag = '';
+    if (t.gate) {
+      tag = '<span class="todo-tag gate ' + (t.done ? 'done' : '') + '">人工闸门 · ' + escapeHtml(t.role_name || '系统') + '</span>';
+    } else {
+      tag = '<span class="todo-tag role">' + escapeHtml(t.role_name || '系统') + '</span>';
+    }
+    if (t.mine) tag += '<span class="todo-tag mine">我的</span>';
+    return '<div class="todo-item ' + (t.done ? 'done' : '') + (t.mine ? ' mine' : '') + '">' +
+      '<div class="todo-check ' + done + '">' + (t.done ? '✓' : '') + '</div>' +
+      '<div class="todo-body"><span class="todo-label">' + escapeHtml(t.label) + '</span>' + tag + '</div></div>';
+  }).join('') || '<div class="empty-hint">本阶段暂无待办</div>';
+}
+
+// ==================== 会话记录 ====================
+async function renderSessions(){
+  const el = $('panel-sessions');
+  el.innerHTML = '<div class="panel-title">会话记录</div><div class="panel-sub">当前会话的对话流水（已持久化，刷新/重启后仍可查）</div><div class="session-log"><div class="loading">加载中…</div></div>';
+  await ensureSession();
+  let msgs = [];
+  try {
+    const d = await (await fetch('/api/chat?session_id=' + encodeURIComponent(projectId))).json();
+    msgs = (d.messages || []).map(m => ({ role: m.role === 'user' ? 'user' : 'ai', text: m.content, time: m.created_at }));
+  } catch(e){}
+  if (!msgs.length) msgs = chatLog;  // 后端无持久记录时回退内存（兼容旧会话）
+  const list = msgs.length
+    ? msgs.map(m => '<div class="slog-item"><div class="slog-role ' + m.role + '">' + escapeHtml(m.role === 'user' ? '我' : 'AI') + '</div><div class="slog-text">' + escapeHtml(m.text) + '</div><div class="slog-time">' + escapeHtml(m.time || '') + '</div></div>').join('')
+    : '<div class="empty-hint"><div class="big">💬</div>本会话暂无对话记录，请在「新建任务」发起审计任务。</div>';
+  el.innerHTML = '<div class="panel-title">会话记录</div><div class="panel-sub">当前会话的对话流水（已持久化，刷新/重启后仍可查）</div><div class="session-log">' + list + '</div>';
+}
+
+function logEntry(role, text){
+  chatLog.push({ role, text, time: nowStr() });
+  if (currentView === 'sessions') renderSessions();
+}
+
+// ==================== 项目资料 ====================
+async function renderMaterials(){
+  const el = $('panel-materials');
+  el.innerHTML = '<div class="panel-title">项目资料</div><div class="panel-sub">真实脱敏历史数据 · 只读检索</div>' +
+    '<div class="tabs"><button class="tab active" id="tabProblems" onclick="renderProblems()">审计问题库</button><button class="tab" id="tabLedger" onclick="renderLedger()">整改台账</button></div><div id="matBody"><div class="loading">加载中…</div></div>';
+  renderProblems();
+}
+
+async function renderProblems(){
+  const el = $('panel-materials');
+  const head = el.querySelector('.tabs');
+  if (head){ head.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tabProblems')); }
+  const d = await (await fetch('/api/problems?page=1&size=20')).json();
+  const sum = d.summary || {}; const items = (d.result && d.result.items) || []; const total = (d.result && d.result.total) || 0;
+  const cols = ['年度','项目名称','监督职能','业务领域','问题定性','问题名称','问题涉及金额_万元'];
+  $('matBody').innerHTML = '<div class="card"><div class="card-title" style="font-size:14px">审计问题库 <span style="color:#999;font-weight:400;font-size:12px">共 ' + total + ' 条 · 涉及金额 ' + (sum['涉及金额_万元']!=null?sum['涉及金额_万元']:'—') + ' 万元</span></div>' +
+    '<div class="table-wrap"><table class="data"><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+items.map(r=>'<tr>'+cols.map(c=>'<td>'+escapeHtml(r[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>' +
+    '<div class="note">数据来源：国家管网审计管理信息系统「问题清单信息导出」，已脱敏。</div>';
+}
+async function renderLedger(){
+  const el = $('panel-materials');
+  const head = el.querySelector('.tabs');
+  if (head){ head.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tabLedger')); }
+  const d = await (await fetch('/api/ledger?page=1&size=20')).json();
+  const sum = d.summary || {}; const items = (d.result && d.result.items) || []; const total = (d.result && d.result.total) || 0;
+  const cols = ['年度','项目名称','被审计单位','问题定性','整改状态','是否销号','问题涉及金额_元','整改成果金额_元'];
+  $('matBody').innerHTML = '<div class="card"><div class="card-title" style="font-size:14px">整改台账 <span style="color:#999;font-weight:400;font-size:12px">共 ' + total + ' 条 · 已销号 ' + (sum['已销号']||0) + '</span></div>' +
+    '<div class="table-wrap"><table class="data"><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+items.map(r=>'<tr>'+cols.map(c=>'<td>'+escapeHtml(r[c]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>' +
+    '<div class="note">数据来源：国家管网审计管理信息系统 2023-2025 年整改台账，已脱敏。</div>';
+}
+
+// ==================== 新建任务（对话控制台 · Dify 风格） ====================
+const SUGGESTIONS = [
+  { icon:'🚀', title:'项目立项', desc:'下达审计任务，生成立项申请', prompt:'帮我创建2026年业务外包专项审计项目' },
+  { icon:'📝', title:'审前准备', desc:'编制实施方案与审前资料',     prompt:'生成审计实施方案' },
+  { icon:'🔍', title:'现场实施', desc:'取数筛查、法规检索与底稿',   prompt:'对某公司差旅费报销开展专项审计' },
+  { icon:'📄', title:'报告编制', desc:'汇总问题清单与审计报告',     prompt:'生成审计报告' },
+  { icon:'✅', title:'整改督办', desc:'整改台账与督办销号',         prompt:'生成整改台账' },
+  { icon:'🗂️', title:'项目归档', desc:'归档三清单与项目闭环',       prompt:'项目归档' },
+];
+let pendingFiles = [];
+
+function renderSuggestions(){
+  const el = $('suggestionCards');
+  if (!el) return;
+  el.innerHTML = SUGGESTIONS.map((s, i) =>
+    '<div class="sug-card" onclick="fillSuggestion(' + i + ')">' +
+      '<div class="sug-card-icon">' + s.icon + '</div>' +
+      '<div><div class="sug-card-title">' + s.title + '</div><div class="sug-card-desc">' + s.desc + '</div></div>' +
+    '</div>').join('');
+}
+
+function fillSuggestion(i){
+  const s = SUGGESTIONS[i];
+  $('chatInput').value = s.prompt;
+  $('chatInput').focus();
+}
+
+function updateConsoleHome(){
+  const hasMsgs = $('chatMessages').childElementCount > 0;
+  const home = $('consoleHome');
+  const scroll = $('chatScroll');
+  if (home) home.style.display = hasMsgs ? 'none' : '';
+  if (scroll) scroll.style.display = hasMsgs ? '' : 'none';
+}
+
+function toggleUploadDropdown(e){
+  e.stopPropagation();
+  $('homeUploadDropdown').classList.toggle('show');
+}
+document.addEventListener('click', function(){ const d = $('homeUploadDropdown'); if (d) d.classList.remove('show'); });
+
+function selectAuditFiles(e, accept){
+  e.stopPropagation();
+  $('homeUploadDropdown').classList.remove('show');
+  const inp = $('homeFileInput');
+  inp.accept = accept;
+  inp.click();
+}
+
+function handleSelectedFiles(fileList){
+  (Array.from(fileList || [])).forEach(f => pendingFiles.push({ name: f.name, size: f.size }));
+  $('homeFileInput').value = '';
+  renderAttachments();
+}
+
+function renderAttachments(){
+  const el = $('homeAttachmentList');
+  if (!el) return;
+  el.innerHTML = pendingFiles.map((f, i) =>
+    '<span class="home-attachment-chip"><span title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</span>' +
+    '<button onclick="removeAttachment(' + i + ')">×</button></span>').join('');
+}
+
+function removeAttachment(i){
+  pendingFiles.splice(i, 1);
+  renderAttachments();
+}
+
+function fmtSize(b){
+  if (b == null) return '';
+  if (b < 1024) return b + 'B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + 'KB';
+  return (b / 1024 / 1024).toFixed(1) + 'MB';
+}
+
+function escapeHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function inlineMd(s){ return escapeHtml(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>'); }
+
+function renderMarkdown(md){
+  if (!md) return '';
+  const lines = md.split('\n');
+  let html = '', i = 0, inCode = false, codeBuf = [];
+  while (i < lines.length){
+    const line = lines[i];
+    if (line.trim().startsWith('```')){
+      if (!inCode){ inCode = true; codeBuf = []; }
+      else { html += '<pre><code>' + escapeHtml(codeBuf.join('\n')) + '</code></pre>'; inCode = false; }
+      i++; continue;
+    }
+    if (inCode){ codeBuf.push(line); i++; continue; }
+    if (line.trim().startsWith('|') && i+1 < lines.length && /^\s*\|?[\s:|-]+\|\s*$/.test(lines[i+1].trim())){
+      const header = line.split('|').slice(1,-1).map(c=>c.trim());
+      i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')){ rows.push(lines[i].split('|').slice(1,-1).map(c=>c.trim())); i++; }
+      html += '<div class="md-table-scroll"><table><thead><tr>' + header.map(c=>'<th>'+inlineMd(c)+'</th>').join('') + '</tr></thead><tbody>' +
+        rows.map(r=>'<tr>'+r.map(c=>'<td>'+inlineMd(c)+'</td>').join('')+'</tr>').join('') + '</tbody></table></div>';
+      continue;
+    }
+    const h = line.match(/^(#{1,4})\s+(.*)/);
+    if (h){ const n = h[1].length; html += '<h'+n+'>' + inlineMd(h[2]) + '</h'+n+'>'; i++; continue; }
+    if (/^\s*[-*]\s+/.test(line)){ html += '<ul><li>' + inlineMd(line.replace(/^\s*[-*]\s+/,'')) + '</li></ul>'; i++; continue; }
+    if (/^\s*\d+[.、]\s*/.test(line)){ html += '<ol><li>' + inlineMd(line.replace(/^\s*\d+[.、]\s*/,'')) + '</li></ol>'; i++; continue; }
+    if (!line.trim()){ i++; continue; }
+    html += '<p>' + inlineMd(line) + '</p>'; i++;
+  }
+  if (inCode) html += '<pre><code>' + escapeHtml(codeBuf.join('\n')) + '</code></pre>';
+  return html;
+}
+
+function appendMsg(role, name, content){
+  const wrap = $('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  const avatar = role === 'user' ? '我' : 'AI';
+  const who = role === 'user' ? '我' : name;
+  el.innerHTML = '<div class="avatar">' + avatar + '</div><div class="msg-body"><div class="msg-name">' + escapeHtml(who) + '</div><div class="bubble">' + content + '</div></div>';
+  wrap.appendChild(el);
+  $('chatScroll').scrollTop = $('chatScroll').scrollHeight;
+  return el;
+}
+
+function appendBubble(kind, text){
+  const wrap = $('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'msg ai';
+  el.innerHTML = '<div class="avatar">AI</div><div class="msg-body"><div class="msg-name">审计数字员工</div><div class="bubble ' + kind + '">' + renderReply(text) + '</div></div>';
+  wrap.appendChild(el);
+  $('chatScroll').scrollTop = $('chatScroll').scrollHeight;
+}
+
+// ==================== 回复层渲染（折叠块 + 可复制模板） ====================
+function renderReply(text){
+  if (!text) return '';
+  // 按 <details> 折叠块切分：折叠块是后台可信 HTML，原样保留并内部换行转 <br>；
+  // 其余主对话内容走 renderReplyBody（分隔线切模板块 + 逐行渲染）。
+  const parts = text.split(/(<details>[\s\S]*?<\/details>)/g);
+  let html = '';
+  for (const part of parts){
+    if (!part) continue;
+    html += part.indexOf('<details>') === 0 ? part.replace(/\n/g, '<br>') : renderReplyBody(part);
+  }
+  return html;
+}
+
+function renderReplyBody(body){
+  // 以「——————————」分隔线切出模板段，其余按行渲染
+  const parts = body.split('——————————');
+  let html = '';
+  parts.forEach((part, i) => {
+    if (i % 2 === 1){
+      html += '<div class="tpl-block"><pre>' + escapeHtml(part.trim()) + '</pre><button class="copy-btn" type="button" onclick="copyTpl(this)">复制模板</button></div>';
+    } else {
+      html += renderLines(part);
+    }
+  });
+  return html;
+}
+
+function renderLines(text){
+  const lines = text.split('\n');
+  let out = '';
+  for (const ln of lines){
+    if (!ln.trim()){ out += '<div class="reply-gap"></div>'; continue; }
+    out += '<div class="reply-line">' + inlineMd(ln) + '</div>';
+  }
+  return out;
+}
+
+function copyTpl(btn){
+  const pre = btn.parentElement.querySelector('pre');
+  const text = pre ? pre.textContent : '';
+  const done = () => { const old = btn.textContent; btn.textContent = '已复制'; setTimeout(() => { btn.textContent = old; }, 1200); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(btn, text, done));
+  } else {
+    fallbackCopy(btn, text, done);
+  }
+}
+function fallbackCopy(btn, text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch(e){}
+  document.body.removeChild(ta);
+}
+
+function renderBlock(b){
+  if (b.type === 'json') return '<div class="block"><div class="block-label">' + escapeHtml(b.label || '') + '</div><pre class="md"><code>' + escapeHtml(b.content || '') + '</code></pre></div>';
+  if (b.type === 'retrieved'){
+    const items = (b.items || []).map(r => '<div style="border:1px solid #f0f0f0;border-radius:7px;padding:7px 10px;margin-bottom:6px;font-size:12.5px"><div style="font-size:11px;color:var(--primary);font-weight:700">' + escapeHtml(r.source || '') + ' <span style="color:#999;font-weight:400">相关度 ' + escapeHtml(r.score ?? '') + '</span></div>' + escapeHtml(r.text || '') + '</div>').join('');
+    return '<div class="block"><div class="block-label">' + escapeHtml(b.label || '') + '</div>' + (items || '<span style="color:#999">无检索结果</span>') + '</div>';
+  }
+  return '<div class="block"><div class="block-label">' + escapeHtml(b.label || '') + '</div><div class="md">' + renderMarkdown(b.content || '') + '</div></div>';
+}
+
+function renderStageResult(r){
+  const wrap = $('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'msg ai';
+  const blocks = (r.blocks || []).map(renderBlock).join('');
+  const gate = r.gate ? '<div class="gate-note">🚦 ' + escapeHtml(r.gate) + '</div>' : '';
+  const next = r.next_hint ? '<div class="next-note">下一步：' + escapeHtml(r.next_hint) + '</div>' : '';
+  el.innerHTML = '<div class="avatar">AI</div><div class="msg-body"><div class="msg-name">审计数字员工</div><div class="bubble">' +
+    '<div class="stage-title">已识别阶段：' + escapeHtml(r.title || '') + ' <span class="tag">' + escapeHtml(r.stage || '') + '</span></div>' +
+    blocks + gate + next + '</div></div>';
+  wrap.appendChild(el);
+  $('chatScroll').scrollTop = $('chatScroll').scrollHeight;
+}
+
+async function sendChat(){
+  const input = $('chatInput').value.trim();
+  if (!input) return;
+  await ensureSession();
+  const filesNote = pendingFiles.length ? '<div class="msg-files">' +
+    pendingFiles.map(f => '<span class="file-tag">📎 ' + escapeHtml(f.name) + (f.size != null ? ' · ' + fmtSize(f.size) : '') + '</span>').join('') +
+    '</div>' : '';
+  appendMsg('user', '我', filesNote + escapeHtml(input));
+  logEntry('user', input);
+  pendingFiles = [];
+  renderAttachments();
+  updateConsoleHome();
+  $('chatInput').value = '';
+  $('sendBtn').disabled = true;
+  const typing = appendMsg('ai', '审计数字员工', '<span class="bubble typing">识别意图中…</span>');
+  try {
+    const resp = await fetch('/api/run', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({session_id: projectId, input, role: currentRole}) });
+    const r = await resp.json();
+    typing.remove();
+    if (r.info){ appendBubble('info', r.info); logEntry('ai', r.info); }
+    else if (r.err){ appendBubble('err', r.err); logEntry('ai', r.err); }
+    else if (r.blocked){ appendBubble('err', r.blocked_msg); logEntry('ai', r.blocked_msg); }
+    else {
+      if (r.reply) appendBubble('', r.reply);
+      renderStageResult(r);
+      logEntry('ai', '已识别阶段：' + (r.title || r.stage || ''));
+      if (r.current_role) currentRole = r.current_role;
+      loadRoles();
+    }
+    refreshNotices();
+  } catch (e) {
+    typing.remove();
+    appendBubble('err', '请求失败：' + e.message + '（请确认后端已启动）');
+  } finally {
+    $('sendBtn').disabled = false;
+    $('chatInput').focus();
+  }
+}
+$('chatInput').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); } });
+
+// ==================== 使用手册 ====================
+function renderManual(){
+  const stages = ['审计立项','审前准备','现场实施','审计报告编制','问题整改','项目归档'].map((s,i) =>
+    '<div class="card" style="flex:1;min-width:150px"><div class="card-title" style="font-size:13px"><span style="color:var(--primary)">'+(i+1)+'.</span> '+s+'</div><div class="card-desc" style="margin-bottom:0;font-size:12px">阶段 '+(i+1)+' / 6</div></div>').join('');
+  $('panel-manual').innerHTML =
+    '<div class="panel-title">使用手册</div><div class="panel-sub">审计数字员工操作指引</div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">六阶段审计工作流</div><div class="card-desc">从项目立项到项目归档，全程会签留痕。</div><div style="display:flex;gap:12px;flex-wrap:wrap">'+stages+'</div></div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">操作指引</div><div class="card-desc">' +
+      '<div style="line-height:2;font-size:13px;color:#444">' +
+      '1. 在 <strong>新建任务</strong> 输入审计业务描述，或点击示例卡片快速开始。<br>' +
+      '2. 系统识别阶段并生成结构化表单/文档；如需补全，按提示续填「字段=值」。<br>' +
+      '3. 左侧 <strong>角色切换器</strong> 在 10 个角色间切换，各角色仅确认自己负责的会签项。<br>' +
+      '4. 在 <strong>项目看板</strong> 查看六阶段进度、当前角色待办与人工闸门。<br>' +
+      '5. 会签链全部通过后自动推进至下一阶段，直至项目归档。<br>' +
+      '6. <strong>会话记录</strong> 保留本会话对话流水；<strong>项目资料</strong> 汇总各阶段已生成文档。' +
+      '</div></div></div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">角色说明</div><div class="card-desc">项目负责人 · 业务负责人 · 组长 · 主审 · 小组长 · 审计人员 · 迎审人员 · 审理组 · 部门整改负责人 · 业务部门负责人。角色由系统登记，权限与任命由人工完成。</div></div>' +
+    '<div class="note">本系统基于真实脱敏数据运行，不编造数据、法规、文号与模板。</div>';
+}
+
+// ==================== 后台管理：流程引擎 ====================
+async function renderFlow(){
+  const d = await (await fetch('/api/flow')).json();
+  const stages = (d.stages || []).map((s, i) => '<div class="card"><div class="card-title" style="font-size:14px"><span style="color:var(--primary)">' + (i+1) + '. ' + escapeHtml(s.name) + '</span></div><div class="card-desc">' +
+    '<div class="chips"><span class="chip red">流转条件：' + escapeHtml(s.gate || '—') + '</span>' + (s.rollback ? '<span class="chip">回退分支：' + escapeHtml(s.rollback) + '</span>' : '<span class="chip green">起始</span>') + '</div></div></div>').join('');
+  $('panel-admin').innerHTML = '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">智能体编排</div><div class="panel-sub">六阶段流转 + 人工闸门 + 回退分支（起点：' + escapeHtml(d.start || '') + '）</div>' + stages;
+}
+
+// ==================== 后台管理：智能体编排 ====================
+async function renderAgents(){
+  const d = await (await fetch('/api/agents')).json();
+  const legend = (d.tool_legend || {});
+  const legendHtml = '<div class="chips" style="margin-bottom:14px">' + Object.keys(legend).map(k => '<span class="chip red">' + escapeHtml(k) + '：' + escapeHtml(legend[k]) + '</span>').join('') + '</div>';
+  const cards = (d.agents || []).map(a => '<div class="card"><div class="card-title" style="font-size:14px">' + escapeHtml(a.name) + ' <span class="chip">' + escapeHtml(a.stage) + '</span></div><div class="card-desc">' +
+    '<div style="font-size:12.5px;color:#555;margin-bottom:8px"><strong>职责：</strong>' + escapeHtml((a.responsibilities||[]).join('、')) + '</div>' +
+    '<div class="chips" style="margin-bottom:6px">' + (a.tools||[]).map(t=>'<span class="chip">'+escapeHtml(t)+'</span>').join('') + '</div>' +
+    '<div style="font-size:12px;color:#999"><strong>红线：</strong>' + escapeHtml((a.boundaries||[]).join('、')) + '</div>' +
+    '<div style="font-size:12px;color:#999"><strong>输出：</strong>' + escapeHtml((a.outputs||[]).join('、')) + ' · <strong>人工闸门：</strong>' + escapeHtml(a.gate||'') + '</div>' +
+    '</div></div>').join('');
+  $('panel-admin').innerHTML = '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">Agent 管理</div><div class="panel-sub">' + escapeHtml(d.title || '六阶段 Agent 编排') + '</div>' + legendHtml + cards;
+}
+
+// ==================== 后台管理：知识库 ====================
+async function renderKnowledge(){
+  const d = await (await fetch('/api/knowledge')).json();
+  const req = d.retrieval || {};
+  const cfg = '<span class="chip red" style="font-weight:600">Top K = ' + escapeHtml(req.top_k) + '</span> <span class="chip red" style="font-weight:600">阈值 = ' + escapeHtml(req.threshold) + '</span>';
+  const lib = (name, libs, count) => '<div class="card" style="flex:1;min-width:220px"><div class="card-title" style="font-size:14px">' + escapeHtml(name) + '</div><div class="card-desc">' + count + ' 篇示例</div><div class="chips">' + (libs||[]).map(x=>'<span class="chip">'+escapeHtml(x)+'</span>').join('') + '</div></div>';
+  const rows = (d.docs||[]).map(r => '<tr><td>'+escapeHtml(r.source)+'</td><td>'+escapeHtml(r.article)+'</td><td>'+escapeHtml(r.effective)+'</td><td>'+escapeHtml(r.confidence)+'</td><td><span class="chip '+(r.level==='公共'?'red':'green')+'">'+escapeHtml(r.level)+'</span></td><td>'+escapeHtml(r.library)+'</td><td>'+escapeHtml(r.stage)+'</td></tr>').join('');
+  $('panel-admin').innerHTML = '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">知识管理</div><div class="panel-sub">两级结构 · 元数据 · 检索配置</div>' +
+    '<div class="chips" style="margin-bottom:14px">' + cfg + '</div>' +
+    '<div style="display:flex;gap:12px;flex-wrap:wrap">' + lib(d.public.name, d.public.libraries, d.public.count) + lib(d.stage.name, d.stage.libraries, d.stage.count) + '</div>' +
+    '<div class="card" style="margin-top:14px"><div class="card-title" style="font-size:14px">知识条目清单</div><div class="table-wrap"><table class="data"><thead><tr><th>来源</th><th>条款位置</th><th>生效期</th><th>置信度</th><th>层级</th><th>所属库</th><th>阶段</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+// ==================== 后台管理：工具契约 ====================
+async function renderTools(){
+  const d = await (await fetch('/api/tools')).json();
+  const c = d.contract || {};
+  const fam = (d.families||[]).map(f=>'<div class="card" style="flex:1;min-width:160px"><div class="card-title" style="font-size:14px;color:var(--primary)">'+escapeHtml(f.family)+'</div><div class="card-desc">风险 '+escapeHtml(f.risk_level)+'<br>'+escapeHtml(f.desc)+'</div></div>').join('');
+  const tools = (d.tools||[]).map(t => '<div class="card"><div class="card-title" style="font-size:14px">'+escapeHtml(t.name)+' <code style="font-size:11px;color:#888">'+escapeHtml(t.tool)+'</code> <span class="chip red">'+escapeHtml(t.risk_level)+'</span></div><div class="card-desc">调用条件：'+escapeHtml(t.condition)+'</div><div class="chips">'+(t.rules||[]).map(r=>'<span class="chip red">'+escapeHtml(r)+'</span>').join('')+'</div></div>').join('');
+  $('panel-admin').innerHTML = '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">工具管理</div><div class="panel-sub">统一契约 · 五类 ' + (d.tools||[]).length + ' 个子工具 · 契约版本 ' + escapeHtml(c.schema_version) + '</div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">契约幂等</div><div class="card-desc">' + escapeHtml(c.idempotency || '') + '</div></div>' +
+    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">' + fam + '</div>' +
+    '<div class="note" style="margin-bottom:12px">当前通过统一契约直连真实脱敏数据与检索/生成；后续通过 MCP 标准化工具网关对接财务系统/数据仓库。</div>' +
+    tools;
+}
+
+// ==================== 后台管理：用户管理 ====================
+function renderAdminUsers(){
+  const users = [
+    ['李管理员','admin','管理员','审计项目组','在线','2026-08-26 09:12'],
+    ['张审计','zhangshen','主审','审计一处','在线','2026-08-26 08:40'],
+    ['李审计','lishen','审计人员','审计一处','离线','2026-08-25 17:22']
+  ];
+  const rows = users.map(u => '<tr><td>'+u[0]+'</td><td>'+u[1]+'</td><td><span class="chip red">'+u[2]+'</span></td><td>'+u[3]+'</td><td><span class="chip '+(u[4]==='在线'?'green':'')+'">'+u[4]+'</span></td><td>'+u[5]+'</td></tr>').join('');
+  $('panel-admin').innerHTML =
+    '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">用户管理</div><div class="panel-sub">组织成员与角色权限（角色由系统登记，权限与任命由人工完成）</div>' +
+    '<div class="stat-grid">' +
+      '<div class="stat-card"><div class="stat-num">3</div><div class="stat-label">演示账号</div></div>' +
+      '<div class="stat-card"><div class="stat-num">2</div><div class="stat-label">在线用户</div></div>' +
+      '<div class="stat-card"><div class="stat-num">10</div><div class="stat-label">业务角色</div></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">成员清单</div><div class="table-wrap"><table class="data"><thead><tr><th>姓名</th><th>账号</th><th>角色</th><th>部门</th><th>状态</th><th>最近登录</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>' +
+    '<div class="note">角色注册表：项目负责人 / 业务负责人 / 组长 / 主审 / 小组长 / 审计人员 / 迎审人员 / 审理组 / 部门整改负责人 / 业务部门负责人。</div>';
+}
+
+// ==================== 后台管理：评测指标 ====================
+function renderAdminMetrics(){
+  const bars = [
+    ['法规检索命中率','92%',92],
+    ['问题定性准确率','88%',88],
+    ['底稿质量合格率','95%',95],
+    ['整改销号及时率','81%',81]
+  ];
+  const barHtml = bars.map(b => '<div class="bar-row"><span class="bar-label">'+b[0]+'</span><div class="bar-track"><div class="bar-fill" style="width:'+b[2]+'%"></div></div><span class="bar-val">'+b[1]+'</span></div>').join('');
+  $('panel-admin').innerHTML =
+    '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">评测指标</div><div class="panel-sub">审计工作台质量与效率指标（演示骨架，接入评测集后由真实运行填充）</div>' +
+    '<div class="stat-grid">' +
+      '<div class="stat-card"><div class="stat-num">92%</div><div class="stat-label">整体准确率</div></div>' +
+      '<div class="stat-card"><div class="stat-num">88%</div><div class="stat-label">召回率</div></div>' +
+      '<div class="stat-card"><div class="stat-num">4.6</div><div class="stat-label">满意度 / 5</div></div>' +
+      '<div class="stat-card"><div class="stat-num">91%</div><div class="stat-label">任务完成率</div></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">分项指标</div>'+barHtml+'</div>';
+}
+
+// ==================== 后台管理：Prompt 管理 ====================
+function renderAdminPrompts(){
+  const prompts = [
+    ['parse_project_form','立项信息抽取','InitiationAgent','v3','2026-08-20','启用'],
+    ['generate_audit_notice','审查通知书','PreAuditAgent','v2','2026-08-18','启用'],
+    ['generate_report','审计报告生成','ReportAgent','v4','2026-08-22','启用'],
+    ['generate_rectification_plan','整改方案','RectificationAgent','v2','2026-08-19','启用']
+  ];
+  const rows = prompts.map(p => '<tr><td><code style="font-size:11px;color:#666">'+p[0]+'</code></td><td>'+p[1]+'</td><td>'+p[2]+'</td><td>'+p[3]+'</td><td>'+p[4]+'</td><td><span class="chip green">'+p[5]+'</span></td></tr>').join('');
+  $('panel-admin').innerHTML =
+    '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">Prompt 管理</div><div class="panel-sub">各智能体提示词模板与版本管理</div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">提示词清单</div><div class="table-wrap"><table class="data"><thead><tr><th>Prompt Key</th><th>用途</th><th>关联智能体</th><th>版本</th><th>更新时间</th><th>状态</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+// ==================== 后台管理：日志管理 ====================
+function renderAdminLogs(){
+  const logs = [
+    ['2026-08-26 09:15:03','李管理员','项目负责人','项目立项','创建审计项目','成功'],
+    ['2026-08-26 09:18:41','张审计','主审','审前准备','审核实施方案','通过'],
+    ['2026-08-26 09:22:07','李审计','审计人员','现场实施','确认底稿','成功'],
+    ['2026-08-26 09:30:55','张审计','主审','报告编制','复核问题定性','通过']
+  ];
+  const rows = logs.map(l => '<tr><td>'+l[0]+'</td><td>'+l[1]+'</td><td>'+l[2]+'</td><td>'+l[3]+'</td><td>'+l[4]+'</td><td><span class="chip green">'+l[5]+'</span></td></tr>').join('');
+  $('panel-admin').innerHTML =
+    '<div class="back-row"><button class="btn" onclick="switchView(\'workbench\')">← 返回工作台</button></div>' +
+    '<div class="panel-title">日志管理</div><div class="panel-sub">操作审计与留痕（演示骨架）</div>' +
+    '<div class="card"><div class="card-title" style="font-size:14px">最近操作</div><div class="table-wrap"><table class="data"><thead><tr><th>时间</th><th>操作人</th><th>角色</th><th>模块</th><th>操作</th><th>结果</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+// ==================== 系统设置 ====================
+async function renderSettings(){
+  let kb = {}; try { kb = (await (await fetch('/api/knowledge')).json()).retrieval || {}; } catch(e){}
+  let tc = {}; try { tc = (await (await fetch('/api/tools')).json()).contract || {}; } catch(e){}
+  const rows = [
+    ['大模型', 'deepseek-chat'],
+    ['温度 temperature', '0.3（审计场景低随机）'],
+    ['最大输出 max_tokens', '4096'],
+    ['检索 Top K', String(kb.top_k ?? 6)],
+    ['相似度阈值', String(kb.threshold ?? 0.75)],
+    ['工具契约版本', tc.schema_version || '1.0'],
+    ['服务地址', 'http://127.0.0.1:8000'],
+    ['会话隔离', '按 project_id 独立上下文'],
+  ];
+  $('panel-settings').innerHTML = '<div class="panel-title">系统设置</div><div class="panel-sub">当前运行配置（只读，真实值）</div><div class="card">' +
+    rows.map(r=>'<div class="config-row"><div class="config-k">'+r[0]+'</div><div class="config-v">'+escapeHtml(r[1])+'</div></div>').join('') + '</div>';
+}
+
+// ==================== 个人中心 ====================
+async function renderProfile(){
+  await ensureSession();
+  let state = {}; try { state = await (await fetch('/api/state?session_id=' + encodeURIComponent(projectId))).json(); } catch(e){}
+  const done = state.done || 0;
+  const rows = [
+    ['当前角色', roleName(state.current_role || currentRole)],
+    ['项目 ID', projectId || '—'],
+    ['六阶段完成', done + ' / 6'],
+    ['已识别异常', String(state.stats && state.stats.anomalies != null ? state.stats.anomalies : 0)],
+    ['法规检索', String(state.stats && state.stats.retrieved != null ? state.stats.retrieved : 0)],
+  ];
+  $('panel-profile').innerHTML = '<div class="panel-title">个人中心</div><div class="panel-sub">当前操作人信息</div>' +
+    '<div class="card"><div class="profile-head"><div class="profile-avatar">审</div><div><div class="profile-name">' + escapeHtml(roleName(state.current_role || currentRole)) + '</div><div class="profile-role">审计数字员工 · 演示会话</div></div></div>' +
+    rows.map(r=>'<div class="config-row"><div class="config-k">'+r[0]+'</div><div class="config-v">'+escapeHtml(r[1])+'</div></div>').join('') + '</div>';
+}
+
+// ==================== 退出登录 ====================
+function logout(){
+  $('logoutOverlay').classList.add('show');
+}
+async function relogin(){
+  projectId = null;
+  clearSession();
+  chatLog = [];
+  currentRole = 'project_lead';
+  currentStage = 'initiation';
+  $('logoutOverlay').classList.remove('show');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector('.nav-item[data-view="workbench"]').classList.add('active');
+  $('chatMessages').innerHTML = '';
+  pendingFiles = [];
+  renderAttachments();
+  updateConsoleHome();
+  $('stepper').innerHTML = '';
+  $('todoList').innerHTML = '';
+  $('wbTask').textContent = '尚未下达审计任务';
+  $('notifBadge').textContent = '0';
+  $('notifBadge').classList.add('zero');
+  $('topbarTitle').textContent = '项目看板';
+  await switchView('workbench');
+  loadRoles();
+}
+
+// ==================== 初始化 ====================
+(async function init(){
+  try { await ensureSession(); } catch(e){}
+  loadRoles();
+  renderSuggestions();
+  updateConsoleHome();
+  renderWorkbench();
+})();
+</script>
+</body>
+</html>

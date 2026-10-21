@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: audit-digital-employee
+    runtime: docker
+    healthCheckPath: /health
+    envVars:
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "true"

@@ -1,0 +1,9 @@
+.env
+audit.db
+*.db
+__pycache__/
+*.py[cod]
+.DS_Store
+.pytest_cache/
+.coverage
+test_report.json
